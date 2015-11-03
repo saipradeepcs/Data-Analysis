@@ -1,0 +1,126 @@
+---
+title: "HomeWork_1"
+author: "Sai Pradeep C S"
+M id: M08650972
+date: "November 2, 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+Q1. Import the CSV file 'FAA_r.csv' using the function "read.table()" or "read.csv()". Where to find the instruction on how to use the functions?  
+
+Solution: To import the datafile we can either use read.csv() or read.table(). It depends on format of data. If the data is comma separated, we use read.csv(). We can find more on how to use these functions by typing *?read.csv* or *?read.table* in the console
+
+```{r echo=TRUE}
+
+flights <- read.table('D:/ACADS/Data Analysis and Methods/FAA_r.csv',header=TRUE,sep = ',')
+flights
+```
+Q2. How many variables in the data set? What are their names?
+
+Solution: Length function is used to print the number of variables in the data frame and names function is used to print the column names of the dataframe. Type **?length** and **?name** in consoel to understand on how to use these functions
+```{r echo=TRUE}
+length(names(flights))
+names <-names(flights)
+names
+```
+Q3. How many observations in total? How many observations for Airbus? 
+
+Solution: Length function can be used to count the number of observations
+```{r echo=TRUE}
+Airbus<-length(which(flights$type=="Airbus"))
+Airbus
+
+```
+Q4. Calculate the mean for each of the flight parameters (measures).  Please also report the corresponding standard deviation. 
+
+Solution: We can use **colMeans** to find the mean for all columns at once of a data frame and also **apply** function with **sd** as a parameter on columns can be used to find **Standard deviation** on all columns in a data frame. Type *?colMeans* and *?apply* in console to understand how to use these functions
+```{r echo=TRUE}
+subflights<-flights[c(2:7)]
+colMeans(subflights,na.rm = TRUE,dims = 1)
+apply(subflights, 2,sd,na.rm = TRUE)
+```
+Q5. Obtain the histogram for each of the flight parameters. 
+
+
+```{r echo=TRUE}
+par(mfrow=c(2,3))
+
+for(i in 1:length(subflights))
+  {
+  main<-paste("Histogram of", names[i+1])
+  xLabel <- paste(names[i+1])
+  hist(subflights[,i],xlab = xLabel,main = main)
+  
+ }
+```
+
+Q6. Is there any missing value in the data set? If yes, which variable? What is the proportion of missing values? By exploring the data, can you see the pattern of missing values? In other words, when the values are missing? 
+
+Solution: From Analysis it is observed that When **speed_ground** is less than 87 (approxiamtely) **speed_air** value is NA
+```{r echo=eval}
+#Total NA in flights$speed_air
+
+apply(is.na(flights),2,sum)
+
+#Total non NA in flights$speed_air
+
+apply(!(is.na(flights)),2,sum)
+
+proportion <- apply(is.na(flights),2,sum)[5]/apply(!(is.na(flights)),2,sum)[1]
+print(proportion)
+NA_speed_air <- flights[which(flights$speed_ground<87),]
+print(NA_speed_air)
+dim(NA_speed_air)
+```
+Q7. Calculate the speed of the air flow (defined as the difference between speed_ground and speed_air). What is the average speed of the air flow? Note the speed should be positive.  
+
+Solution: As speed should be positive, individual values in speed_airflow should be positive too. In order make speed positive we can take absolute of **speed_airflow** and find mean of **speed_airflow** by omitting NA values (Type ?abs and ?mean in console to understand how to use these functions)
+```{r echo=TRUE}
+flights$speed_airflow <- (flights$speed_air - flights$speed_ground)
+Average_Speed_airflow<-mean(abs(flights$speed_airflow),na.rm = TRUE)
+Average_Speed_airflow
+```
+
+
+Q8. How many flights have duration less than 40 minutes? How many flights have height less than 6 meters? Please delete those observations from the data set.  
+
+Solution: We can use **sum** function to count the number of records satisfying certain criteria (duration<40 and height<6 in our case)
+
+```{r echo=TRUE}
+sum(flights$duration<40)
+sum(flights$height<6)
+
+flights <- flights[-c(c(which(flights$height<6)),which(flights$duration<40)),]
+dim(flights)
+```
+
+Q9. Divide the cleaned data set (as obtained in Step 8) into two subsets: Airbus and Boeing.  
+
+```{r echo=TRUE}
+flights_airbus <- flights[which(flights$type=="Airbus"),]
+flights_Boeing <- flights[which(flights$type=="Boeing"),]
+```
+
+Q10. Is there any difference between these two aircraft makes (in terms of speed, height, pitch)? 
+
+Solution: 
+Mean speed_ground of Airbus and Boeing are 79.86 and 78.80 
+
+Mean speed_air of Airbus and Boeing are 102.37 and 101.83
+
+Mean height of Airbus and Boeing are 29.65 and 30.287
+
+Mean pitch of Airbus and Boeing are 4.177 and 4.164
+
+**From the above observation, there is no major difference between these two aircraft makes**
+
+```{r echo=TRUE}
+summary(flights_airbus)[c(1,3,4,6),c(4,5,6,7)]
+summary(flights_Boeing)[c(1,3,4,6),c(4,5,6,7)]
+
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
